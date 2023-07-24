@@ -9,13 +9,14 @@ import re
 
 OPENAI_API_KEY = "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"
 
+
 def init_faiss():
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     vectordb = FAISS.load_local("faiss_index", embeddings)
     return vectordb
 
-def init_base_context():
-    template_chat = """
+def get_prompt():
+    template = """
         You are an oncologist and are tasked to answer cancer related questions posted by patients. 
         Make reference to the context given to answer the questions posted by patients.
         If the information can not be found, you truthfully say "I don't know", don't try to make up an answer.
@@ -31,17 +32,13 @@ def init_base_context():
         Human: {question}
         AI: 
     """
+    prompt = PromptTemplate(template = template,input_variables = ["context", "chat_history", "question"])
+    return prompt
 
-    template = PromptTemplate(
-        template = template_chat,
-        input_variables = ["context", "chat_history", "question"],
-    )
+def new_chat(vectordb):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, max_tokens=512, openai_api_key=OPENAI_API_KEY)
-    return llm, template
-
-def new_chat(vectordb, llm, template):
     memory = ConversationBufferMemory(memory_key="chat_history", input_key = "question")
-    chain_type_kwargs = {"prompt": template, "memory": memory}
+    chain_type_kwargs = {"prompt": get_prompt(), "memory": memory}
     chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vectordb.as_retriever(), return_source_documents=True, chain_type_kwargs=chain_type_kwargs)
     return chain
 
@@ -51,8 +48,7 @@ def process_response(response):
 
 def main():
     vectordb = init_faiss()
-    llm, template = init_base_context()
-    chain = new_chat(vectordb, llm, template)
+    chain = new_chat(vectordb)
     response = chain("My arm is swollen after the surgery. What should I do?")
     print(process_response(response))
 
