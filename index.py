@@ -4,9 +4,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 
 import sys
+import os
 
-OPENAI_API_KEY = "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"
-
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 def add_to_vector_db(file="", dir="", init=False):
     if file != "":

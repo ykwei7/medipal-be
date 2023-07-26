@@ -6,9 +6,9 @@ from langchain.chains import RetrievalQA,ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 
 import re
+import os 
 
-OPENAI_API_KEY = "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"
-
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 def init_faiss():
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
@@ -41,6 +41,10 @@ def new_chat(vectordb):
     chain_type_kwargs = {"prompt": get_prompt(), "memory": memory}
     chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vectordb.as_retriever(), return_source_documents=True, chain_type_kwargs=chain_type_kwargs)
     return chain
+
+def get_response(chatbot, question):
+    response = chatbot(question)
+    return process_response(response)
 
 def process_response(response):
     sources = [str(re.findall( r'[ \w-]+?(?=\.)', name)[0]) for name in (list(set([doc.metadata['source'] for doc in response['source_documents']])))]
