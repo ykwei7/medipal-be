@@ -4,8 +4,26 @@ from chatbot import get_response
 from models import ChatSession, ChatResponseQuality
 import secrets
 import json
+from threading import Lock
 
 TTL = timedelta(minutes=5)
+
+class GlobalSessionStore:
+    def __init__(self):
+        self.sessions = {}
+        self.lock = Lock()
+
+    def get(self, sessionid):
+        with self.lock:
+            return self.sessions.get(sessionid, None)
+        
+    def add(self, user_session):
+        with self.lock:
+            self.sessions[user_session.id] = user_session
+
+    def delete(self, sessionid):
+        with self.lock:
+            return self.sessions.pop(sessionid, None)
 
 class UserSession:
     def __init__(self, userid, email, vectordb):
