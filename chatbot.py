@@ -4,11 +4,10 @@ from langchain.prompts.prompt import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA,ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
+from env import OPENAI_API_KEY
 
 import re
-import os 
 
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 def init_faiss():
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)

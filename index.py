@@ -2,11 +2,9 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.document_loaders import PyPDFDirectoryLoader, PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
+from env import OPENAI_API_KEY
 
 import sys
-import os
-
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 def add_to_vector_db(file="", dir="", init=False):
     if file != "":
