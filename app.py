@@ -5,7 +5,11 @@ from session import UserSession, GlobalSessionStore
 from models import db, User
 from config import ApplicationConfig
 from werkzeug.utils import secure_filename
+from logger import setup_logger
+import logging
 import os
+
+setup_logger()
 
 vectordb = init_faiss()
 sessions = GlobalSessionStore()
@@ -45,6 +49,7 @@ def register_user():
     
     hashed_password = bcrypt.generate_password_hash(password)
     User.add(email, hashed_password, first_name, last_name)
+    logging.info(f"new user {email} created")
     return make_response(jsonify({"msg": "new user added"}), 200)
 
 
@@ -69,6 +74,7 @@ def login_user():
                 "sessionid": session.id, 
                 "first_name": user.first_name,
                 "last_name": user.last_name}
+    logging.info(f"user {user.email} logged in")
     return make_response(jsonify(response), 200)
 
 @app.route("/api/logout", methods=["POST"])
@@ -80,6 +86,7 @@ def logout_user():
     user_session = sessions.delete(sessionid)
     if user_session is not None:
         user_session.store_session()
+        logging.info(f"user {user_session.email} has logged out")
         return make_response(jsonify({"msg": "user logged out"}), 200)
 
     return make_response(jsonify({"error": "session does not exist"}), 200)
@@ -100,6 +107,7 @@ def chat():
             "answer": answer, 
             "history": user_session.get_history(exclude_last=True)}
     
+    logging.info("user {user_session.email} asked question {question}")
     return make_response(jsonify(data), 200)
 
 @app.route("/api/rating", methods=["POST"])
@@ -114,7 +122,7 @@ def rate_response():
         return make_response(jsonify({"error": "invalid params"}), 400)
     
     sessionid = get_sessionid(request.cookies)
-    user_session = sessions[sessionid]
+    user_session = sessions.get(sessionid)
 
     if not user_session.is_valid_index(index):
         return make_response(jsonify({"error": "invalid index"}), 400) 
