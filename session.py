@@ -70,6 +70,9 @@ class UserSession:
         ChatResponseQuality.add(self.id, self.email, index, question, answer)
     
     def store_session(self):
+        if len(self.history) == 0:
+            return 
+        
         ChatSession.add(self.id, 
                         self.email, 
                         self.start_time, 
