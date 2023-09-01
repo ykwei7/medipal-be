@@ -1,10 +1,15 @@
+import os
 import logging
 import logging.handlers
 from logging.handlers import RotatingFileHandler
 
+LOG_DIR = "log"
 LOG_FILENAME = "log/medipal.log"
 
 def setup_logger():
+    if not os.path.exists(LOG_DIR):
+        os.mkdir(LOG_DIR)
+
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
