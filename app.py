@@ -8,6 +8,8 @@ from werkzeug.utils import secure_filename
 from logger import setup_logger
 import logging
 import os
+from flask import Flask
+from flask_cors import CORS
 
 setup_logger()
 
@@ -16,6 +18,7 @@ sessions = GlobalSessionStore()
 
 app = Flask(__name__)
 app.config.from_object(ApplicationConfig)
+CORS(app, origins="https://medipal.vercel.app/", supports_credentials=True, methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 
 bcrypt = Bcrypt(app)
 db.init_app(app)
